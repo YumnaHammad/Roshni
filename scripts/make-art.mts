@@ -2,7 +2,7 @@
 // Run: node scripts/make-art.mts  (Node 23.6+ runs TypeScript directly)
 // Replace any file with a real photo of the same name (or update the path in data.ts).
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { collections, products, type Product } from "../lib/data.ts";
+import { collections, imagesFor, products, type Product } from "../lib/data.ts";
 
 const full = (h: string) => (h.length === 4 ? "#" + [...h.slice(1)].map((c) => c + c).join("") : h);
 const hex = (h: string) => [1, 3, 5].map((i) => parseInt(full(h).slice(i, i + 2), 16));
@@ -32,8 +32,8 @@ function pattern(id: string, kind: Kind, bg: string, fg: string, ac: string, s =
 const folds = (id: string, x1: number, x2: number, n = 7) =>
   `<linearGradient id="${id}" x1="${x1}" x2="${x2}" gradientUnits="userSpaceOnUse">${Array.from({ length: n * 2 + 1 }, (_, i) => `<stop offset="${i / (n * 2)}" stop-color="${i % 2 ? "#fff" : "#000"}" stop-opacity="${i % 2 ? 0.1 : 0.14}"/>`).join("")}</linearGradient>`;
 
-function colors(p: Product, i: number) {
-  const base = p.color.hex;
+function colors(p: Product, i: number, colorIdx = 0) {
+  const base = p.colors[colorIdx].hex;
   const light = lum(base) > 0.6;
   const fg = light ? mix(base, "#2b211c", 0.45) : mix(base, "#fff8ea", 0.55);
   const ac = accents[p.collection];
@@ -44,8 +44,8 @@ function colors(p: Product, i: number) {
 
 const kameez = "M250 200 340 168Q400 222 460 168L550 200 650 360 598 388 560 318 568 858Q400 884 232 858L240 318 202 388 150 360Z";
 
-function look(p: Product, i: number) {
-  const c = colors(p, i);
+function look(p: Product, i: number, k = 0) {
+  const c = colors(p, i, k);
   const dupattaKind = kinds[(i + 3) % kinds.length];
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000"><defs>
 <linearGradient id="bg" x2="0" y2="1"><stop offset="0" stop-color="${c.studio}"/><stop offset="1" stop-color="${mix(c.studio, "#000", 0.08)}"/></linearGradient>
@@ -61,8 +61,8 @@ ${folds("f", 150, 650)}<clipPath id="k"><path d="${kameez}"/></clipPath></defs>
 </svg>`;
 }
 
-function flatlay(p: Product, i: number) {
-  const c = colors(p, i);
+function flatlay(p: Product, i: number, k = 0) {
+  const c = colors(p, i, k);
   const k2 = kinds[(i + 3) % kinds.length];
   const fold = (x: number, y: number, w: number, h: number, fill: string, r: number) =>
     `<g transform="rotate(${r} ${x + w / 2} ${y + h / 2})"><rect x="${x + 10}" y="${y + 14}" width="${w}" height="${h}" rx="6" fill="#000" opacity=".12"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="${fill}"/><rect x="${x}" y="${y}" width="${w}" height="${h * 0.12}" rx="6" fill="#fff" opacity=".18"/><rect x="${x}" y="${y + h - 14}" width="${w}" height="14" fill="#000" opacity=".12"/></g>`;
@@ -74,8 +74,8 @@ ${p.pieces === "Shirt" ? "" : fold(170, 600, 480, 260, "url(#t)", 3)}${p.pieces 
 </svg>`;
 }
 
-function detail(p: Product, i: number) {
-  const c = colors(p, i);
+function detail(p: Product, i: number, k = 0) {
+  const c = colors(p, i, k);
   const scallops = Array.from({ length: 11 }, (_, j) => `<circle cx="${j * 80}" cy="700" r="40" fill="${c.dark}"/>`).join("");
   const beads = Array.from({ length: 21 }, (_, j) => `<circle cx="${j * 40}" cy="${640 + (j % 2) * 12}" r="7" fill="${c.ac}"/>`).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000"><defs>${pattern("p", c.kind, c.base, c.fg, c.ac, 2.6)}${pattern("b", "diamond", c.dark, c.ac, c.ac, 0.8)}${folds("f", 0, 800, 3)}</defs>
@@ -104,10 +104,15 @@ function banner(items: Product[], bg: string, file: string, w = 1600, h = 800) {
 rmSync("public/products", { recursive: true, force: true });
 mkdirSync("public/products", { recursive: true });
 mkdirSync("public/banners", { recursive: true });
+let count = 0;
 products.forEach((p, i) => {
-  writeFileSync(`public/products/${p.slug}-1.svg`, look(p, i));
-  writeFileSync(`public/products/${p.slug}-2.svg`, flatlay(p, i));
-  writeFileSync(`public/products/${p.slug}-3.svg`, detail(p, i));
+  p.colors.forEach((_, k) => {
+    const [a, b, c] = imagesFor(p.slug, k).map((src) => `public${src}`);
+    writeFileSync(a, look(p, i, k));
+    writeFileSync(b, flatlay(p, i, k));
+    writeFileSync(c, detail(p, i, k));
+    count += 3;
+  });
 });
 
 const by = (slug: string) => products.filter((p) => p.collection === slug);
@@ -122,4 +127,4 @@ banner(by("winter"), "#24201d", "public/banners/hero-winter.svg");
 // Editorial split banners (portrait)
 banner(by("embroidered"), "#efe8db", "public/banners/edit-embroidered.svg", 900, 1100);
 banner(products.filter((p) => p.fabric === "Organza" || p.fabric === "Chiffon"), "#3b1420", "public/banners/edit-festive.svg", 900, 1100);
-console.log(`Wrote ${products.length * 3} product images and banners`);
+console.log(`Wrote ${count} product images and banners`);

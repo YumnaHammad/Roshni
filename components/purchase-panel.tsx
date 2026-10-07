@@ -8,20 +8,21 @@ import { formatPrice } from "@/lib/format";
 import { productMessage, whatsappUrl } from "@/lib/whatsapp";
 import { WhatsAppIcon } from "./icons";
 import { Price } from "./price";
+import { ColorPicker, useProductColor } from "./product-color";
 import { QtyStepper } from "./qty-stepper";
 
 interface Props {
   slug: string;
   name: string;
-  image: string;
   lengths: LengthOption[];
   discount?: number;
   inStock: boolean;
   url: string;
 }
 
-export function PurchasePanel({ slug, name, image, lengths, discount, inStock, url }: Props) {
+export function PurchasePanel({ slug, name, lengths, discount, inStock, url }: Props) {
   const { add } = useCart();
+  const { color, images } = useProductColor();
   const [lengthIdx, setLengthIdx] = useState(0);
   const [qty, setQty] = useState(1);
   const [showBar, setShowBar] = useState(false);
@@ -38,7 +39,7 @@ export function PurchasePanel({ slug, name, image, lengths, discount, inStock, u
     return () => io.disconnect();
   }, []);
 
-  const addToBag = () => add({ slug, name, image, length: length.label, price, qty });
+  const addToBag = () => add({ slug, name, image: images[0], length: length.label, color: color.name, price, qty });
 
   return (
     <div className="space-y-7">
@@ -46,6 +47,8 @@ export function PurchasePanel({ slug, name, image, lengths, discount, inStock, u
         <Price price={length.price} discount={discount} size="lg" />
         <p className="mt-1 text-xs text-muted">Inclusive of all taxes</p>
       </div>
+
+      <ColorPicker />
 
       <fieldset>
         <div className="mb-3 flex items-center justify-between">
@@ -83,7 +86,7 @@ export function PurchasePanel({ slug, name, image, lengths, discount, inStock, u
           {inStock ? "Add to bag" : "Sold out"}
         </button>
         <a
-          href={whatsappUrl(productMessage(name, length.label, qty, url))}
+          href={whatsappUrl(productMessage(name, length.label, color.name, qty, url))}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex h-13 items-center justify-center gap-2 border border-[#1f7a4d] text-xs uppercase tracking-[0.22em] text-[#1f7a4d] hover:bg-[#1f7a4d] hover:text-white"
@@ -106,7 +109,7 @@ export function PurchasePanel({ slug, name, image, lengths, discount, inStock, u
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm">{name}</p>
           <p className="text-sm tabular-nums text-muted">
-            {length.label} · {formatPrice(price)}
+            {length.label} · {color.name} · {formatPrice(price)}
           </p>
         </div>
         <button type="button" disabled={!inStock} onClick={addToBag} className="h-11 shrink-0 bg-ink px-6 text-xs uppercase tracking-[0.2em] text-ivory disabled:opacity-50">

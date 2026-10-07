@@ -29,7 +29,7 @@ export function orderMessage(order: OrderDetails) {
   return [
     `*New order ${order.id}*`,
     "",
-    ...order.lines.map((l) => `• ${l.name} (${l.length}) × ${l.qty} = ${formatPrice(l.price * l.qty)}`),
+    ...order.lines.map((l) => `• ${l.name} (${[l.length, l.color].filter(Boolean).join(", ")}) × ${l.qty} = ${formatPrice(l.price * l.qty)}`),
     "",
     `*Subtotal:* ${formatPrice(order.subtotal)}`,
     `*Payment:* ${order.paymentMethod}`,
@@ -44,5 +44,5 @@ export function orderMessage(order: OrderDetails) {
     .join("\n");
 }
 
-export const productMessage = (name: string, length: string, qty: number, url: string) =>
-  `Hi Roshni! I'd like to order:\n${name} (${length}) × ${qty}\n${url}`;
+export const productMessage = (name: string, length: string, color: string, qty: number, url: string) =>
+  `Hi Roshni! I'd like to order:\n${name} (${length}, ${color}) × ${qty}\n${url}`;

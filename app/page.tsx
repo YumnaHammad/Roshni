@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Countdown } from "@/components/countdown";
+import { CountUp } from "@/components/count-up";
 import { HeroSlider, type Slide } from "@/components/hero-slider";
 import {
   CashIcon,
@@ -114,6 +115,7 @@ function SectionTitle({
       <h2 id={id} className="font-serif text-4xl sm:text-5xl">
         {title}
       </h2>
+      <span className="grow-line mx-auto mt-5 block h-px w-20 bg-gold" aria-hidden="true" />
     </div>
   );
 }
@@ -123,7 +125,6 @@ export default function Home() {
     fabric: f,
     product: products.find((p) => p.fabric === f)!,
   }));
-  const lookbook = [11, 0, 15, 7, 17, 5].map((i) => products[i]);
 
   return (
     <>
@@ -179,12 +180,12 @@ export default function Home() {
           title="Shop by Collection"
           id="cat-heading"
         />
-        <ul className="reveal grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
           {collections.map((c) => (
-            <li key={c.slug}>
+            <li key={c.slug} className="reveal">
               <Link
                 href={`/collections/${c.slug}`}
-                className="group relative block aspect-3/4 overflow-hidden bg-sand"
+                className="parallax group relative block aspect-3/4 overflow-hidden bg-sand"
               >
                 <Image
                   src={getCollectionProducts(c.slug)[0].images[0]}
@@ -210,10 +211,19 @@ export default function Home() {
         aria-labelledby="sale-heading"
         className="relative mt-24 overflow-hidden bg-henna text-ivory"
       >
-        <div
-          className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full border border-[#e2b25a]/30"
+        <svg
+          viewBox="0 0 200 200"
+          className="animate-spin-slow pointer-events-none absolute -right-40 -top-40 h-[34rem] w-[34rem] text-[#e2b25a] opacity-25"
           aria-hidden="true"
-        />
+        >
+          <g fill="none" stroke="currentColor" strokeWidth="0.6">
+            {Array.from({ length: 16 }, (_, i) => (
+              <ellipse key={i} cx="100" cy="100" rx="90" ry="28" transform={`rotate(${i * 11.25} 100 100)`} />
+            ))}
+            <circle cx="100" cy="100" r="96" />
+            <circle cx="100" cy="100" r="20" />
+          </g>
+        </svg>
         <div
           className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full border border-[#e2b25a]/20"
           aria-hidden="true"
@@ -227,7 +237,7 @@ export default function Home() {
               id="sale-heading"
               className="mt-4 font-serif text-5xl leading-none sm:text-7xl"
             >
-              Up to <span className="text-[#e2b25a]">40%</span> off
+              Up to <span className="text-shimmer">40%</span> off
             </h2>
             <p className="mt-5 max-w-md text-ivory/85">
               Chiffon, organza and embroidered lawn at their lowest prices of
@@ -243,9 +253,10 @@ export default function Home() {
               Shop the Sale
             </Link>
           </div>
-          <ul className="reveal grid grid-cols-3 gap-3 sm:gap-4">
+          <ul className="grid grid-cols-3 gap-3 sm:gap-4">
             {getSale(3).map((p, i) => (
-              <li key={p.slug} className={i === 1 ? "translate-y-8" : ""}>
+              <li key={p.slug} className={i === 1 ? "mt-8" : ""}>
+                <div className="reveal">
                 <Link href={`/product/${p.slug}`} className="group block">
                   <div className="relative aspect-3/4 overflow-hidden bg-ivory/10">
                     <Image
@@ -267,6 +278,7 @@ export default function Home() {
                     </s>
                   </p>
                 </Link>
+                </div>
               </li>
             ))}
           </ul>
@@ -329,7 +341,7 @@ export default function Home() {
           <Link
             key={e.href}
             href={e.href}
-            className="group relative block aspect-4/5 overflow-hidden sm:aspect-9/11"
+            className="parallax group relative block aspect-4/5 overflow-hidden sm:aspect-9/11"
           >
             <Image
               src={e.img}
@@ -350,7 +362,7 @@ export default function Home() {
       </section>
 
       <section aria-labelledby="fabric-heading" className="bg-sand">
-        <div className="reveal mx-auto max-w-360 px-4 py-20 sm:px-6">
+        <div className="mx-auto max-w-360 px-4 py-20 sm:px-6">
           <SectionTitle
             eyebrow="Feel the difference"
             title="Shop by Fabric"
@@ -358,7 +370,7 @@ export default function Home() {
           />
           <ul className="no-scrollbar -mx-4 flex snap-x gap-5 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:px-0 lg:grid-cols-6">
             {fabricImages.map(({ fabric, product }) => (
-              <li key={fabric} className="w-28 shrink-0 snap-start sm:w-auto">
+              <li key={fabric} className="reveal w-28 shrink-0 snap-start sm:w-auto">
                 <Link
                   href={`/collections?fabric=${encodeURIComponent(fabric)}`}
                   className="group block text-center"
@@ -384,7 +396,7 @@ export default function Home() {
 
       <section
         aria-labelledby="winter-heading"
-        className="relative overflow-hidden"
+        className="parallax relative overflow-hidden"
       >
         <Image
           src="/banners/winter.svg"
@@ -394,7 +406,7 @@ export default function Home() {
           className="object-cover"
         />
         <div className="absolute inset-0 bg-linear-to-r from-black/60 to-transparent" />
-        <div className="relative mx-auto flex min-h-[460px] max-w-360 flex-col justify-center px-5 py-16 text-ivory sm:px-10">
+        <div className="reveal relative mx-auto flex min-h-[460px] max-w-360 flex-col justify-center px-5 py-16 text-ivory sm:px-10">
           <p className="text-xs uppercase tracking-[0.3em]">
             Winter &apos;26 · Pre-launch
           </p>
@@ -419,18 +431,20 @@ export default function Home() {
 
       <section aria-label="Roshni in numbers" className="bg-ink text-ivory">
         <dl className="reveal mx-auto grid max-w-360 grid-cols-2 gap-y-10 px-4 py-14 text-center sm:px-6 lg:grid-cols-4">
-          {[
-            ["50,000+", "Metres delivered"],
-            ["120+", "Cities across Pakistan"],
-            ["4.8★", "Average rating"],
-            ["24 hrs", "WhatsApp confirmation"],
-          ].map(([n, l]) => (
+          {(
+            [
+              [50000, "+", 0, "Metres delivered"],
+              [120, "+", 0, "Cities across Pakistan"],
+              [4.8, "★", 1, "Average rating"],
+              [24, " hrs", 0, "WhatsApp confirmation"],
+            ] as const
+          ).map(([n, suffix, decimals, l]) => (
             <div key={l} className="flex flex-col">
               <dt className="order-2 mt-1 text-xs uppercase tracking-[0.2em] text-ivory/70">
                 {l}
               </dt>
               <dd className="font-serif text-4xl text-[#e2b25a] sm:text-5xl">
-                {n}
+                <CountUp value={n} suffix={suffix} decimals={decimals} />
               </dd>
             </div>
           ))}
@@ -484,28 +498,31 @@ export default function Home() {
           title="The Lookbook"
           id="look-heading"
         />
-        <ul className="reveal grid grid-cols-3 gap-1.5 sm:gap-3 lg:grid-cols-6">
-          {lookbook.map((p) => (
-            <li key={p.slug}>
+      </section>
+      <div className="mt-2 space-y-3" aria-label="Lookbook images">
+        {[products.slice(0, 12), products.slice(12)].map((row, r) => (
+          <Marquee key={r} duration={70} reverse={r === 1}>
+            {row.map((p) => (
               <Link
+                key={p.slug}
                 href={`/product/${p.slug}`}
-                className="group relative block aspect-square overflow-hidden bg-sand"
+                className="group relative mr-3 block aspect-4/5 w-40 shrink-0 overflow-hidden bg-sand sm:w-56"
               >
                 <Image
-                  src={p.images[1]}
+                  src={p.images[r === 0 ? 0 : 1]}
                   alt={p.name}
                   fill
-                  sizes="(min-width: 1024px) 16vw, 33vw"
+                  sizes="224px"
                   className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <span className="absolute inset-0 grid place-items-center bg-ink/50 p-2 text-center text-xs uppercase tracking-wider text-ivory opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="absolute inset-x-0 bottom-0 translate-y-full bg-ink/80 p-2 text-center text-xs uppercase tracking-wider text-ivory transition-transform group-hover:translate-y-0">
                   {p.name}
                 </span>
               </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+            ))}
+          </Marquee>
+        ))}
+      </div>
 
       <section
         aria-labelledby="news-heading"

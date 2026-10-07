@@ -1,22 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { ChevronIcon, CloseIcon, MenuIcon } from "./icons";
 import { mainNav, megaColumns } from "./nav-data";
 import { useFocusTrap } from "./use-focus-trap";
+
+const noop = () => () => {};
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const close = useCallback(() => setOpen(false), []);
   useFocusTrap(panel, open, close);
+  // Portal to <body>: the header's backdrop-blur would otherwise trap this fixed overlay inside the header.
+  const mounted = useSyncExternalStore(noop, () => true, () => false);
 
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} aria-label="Open menu" aria-expanded={open} className="grid h-11 w-11 place-items-center rounded-full hover:bg-sand lg:hidden">
         <MenuIcon />
       </button>
+      {mounted && createPortal(
       <div className={`fixed inset-0 z-50 lg:hidden ${open ? "" : "pointer-events-none"}`} inert={!open}>
         <div className={`absolute inset-0 bg-ink/40 transition-opacity duration-300 ${open ? "opacity-100" : "opacity-0"}`} onClick={close} aria-hidden="true" />
         <div
@@ -65,7 +71,9 @@ export function MobileMenu() {
             </Link>
           </nav>
         </div>
-      </div>
+      </div>,
+      document.body,
+      )}
     </>
   );
 }

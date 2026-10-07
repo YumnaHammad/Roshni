@@ -152,7 +152,7 @@ export function CheckoutForm() {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{l.name}</p>
                 <p className="text-sm text-muted">
-                  {l.length} × {l.qty}
+                  {[l.length, l.color].filter(Boolean).join(" · ")} × {l.qty}
                 </p>
               </div>
               <p className="text-sm tabular-nums">{formatPrice(l.price * l.qty)}</p>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useDeferredValue, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { formatPrice } from "@/lib/format";
 import { CloseIcon, SearchIcon } from "./icons";
 import { useFocusTrap } from "./use-focus-trap";
@@ -23,7 +24,8 @@ export function Search({ items }: { items: SearchItem[] }) {
       <button type="button" onClick={() => setOpen(true)} aria-label="Search products" className="grid h-11 w-11 place-items-center rounded-full hover:bg-sand">
         <SearchIcon />
       </button>
-      {open && <SearchOverlay items={items} onClose={() => setOpen(false)} />}
+      {/* Portal to <body>: the header's backdrop-blur would otherwise trap this fixed overlay inside the header. */}
+      {open && createPortal(<SearchOverlay items={items} onClose={() => setOpen(false)} />, document.body)}
     </>
   );
 }

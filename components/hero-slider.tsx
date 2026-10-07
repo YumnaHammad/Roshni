@@ -14,6 +14,14 @@ export interface Slide {
   dark: boolean;
 }
 
+const delays: Record<number, string> = {
+  100: "[animation-delay:100ms]",
+  250: "[animation-delay:250ms]",
+  400: "[animation-delay:400ms]",
+  550: "[animation-delay:550ms]",
+};
+const enter = (active: boolean, delay: number) => (active ? `animate-fade-up ${delays[delay]}` : "opacity-0");
+
 export function HeroSlider({ slides }: { slides: Slide[] }) {
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -48,13 +56,14 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
           <Image src={s.image} alt="" fill priority={n === 0} sizes="100vw" className={`object-cover object-[70%_center] transition-transform duration-[7000ms] ease-out ${n === i ? "scale-105" : "scale-100"}`} />
           <div className={`absolute inset-0 ${s.dark ? "bg-linear-to-t from-black/85 via-black/45 to-black/10 sm:bg-linear-to-r sm:from-black/60 sm:via-black/25 sm:to-transparent" : "bg-linear-to-t from-ivory via-ivory/70 to-ivory/10 sm:bg-linear-to-r sm:from-ivory/85 sm:via-ivory/35 sm:to-transparent"}`} />
           <div className={`relative mx-auto flex h-full max-w-360 flex-col justify-end px-5 pb-20 sm:justify-center sm:px-10 sm:pb-0 ${s.dark ? "text-ivory" : "text-ink"}`}>
-            <div className={n === i ? "animate-fade-up" : ""}>
-              <p className="mb-4 text-xs uppercase tracking-[0.3em] sm:text-sm">{s.eyebrow}</p>
-              <h2 className="max-w-xl font-serif text-5xl leading-[0.95] sm:text-7xl lg:text-8xl">{s.title}</h2>
-              <p className="mt-5 max-w-md text-base opacity-90 sm:text-lg">{s.text}</p>
+            {/* Staggered entrance each time the slide becomes active */}
+            <div>
+              <p className={`mb-4 text-xs uppercase tracking-[0.3em] sm:text-sm ${enter(n === i, 100)}`}>{s.eyebrow}</p>
+              <h2 className={`max-w-xl font-serif text-5xl leading-[0.95] sm:text-7xl lg:text-8xl ${enter(n === i, 250)}`}>{s.title}</h2>
+              <p className={`mt-5 max-w-md text-base opacity-90 sm:text-lg ${enter(n === i, 400)}`}>{s.text}</p>
               <Link
                 href={s.cta.href}
-                className={`mt-8 inline-block px-10 py-4 text-xs uppercase tracking-[0.22em] ${s.dark ? "bg-ivory text-ink hover:bg-gold hover:text-ivory" : "bg-ink text-ivory hover:bg-henna"}`}
+                className={`mt-8 inline-block px-10 py-4 text-xs uppercase tracking-[0.22em] ${enter(n === i, 550)} ${s.dark ? "bg-ivory text-ink hover:bg-gold hover:text-ivory" : "bg-ink text-ivory hover:bg-henna"}`}
               >
                 {s.cta.label}
               </Link>

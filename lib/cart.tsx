@@ -9,6 +9,8 @@ export interface CartLine {
   name: string;
   image: string;
   length: string;
+  /** Colour name, when the product has colour options */
+  color?: string;
   price: number;
   qty: number;
 }
@@ -33,7 +35,7 @@ function reducer(state: State, action: Action): State {
     case "hydrate":
       return { ...state, lines: action.lines, hydrated: true };
     case "add": {
-      const id = `${action.line.slug}:${action.line.length}`;
+      const id = [action.line.slug, action.line.length, action.line.color].filter(Boolean).join(":");
       const existing = state.lines.find((l) => l.id === id);
       const lines = existing
         ? state.lines.map((l) => (l.id === id ? { ...l, qty: clampQty(l.qty + action.line.qty) } : l))

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import { Gallery } from "@/components/gallery";
 import { CashIcon, ChevronIcon, ExchangeIcon, TruckIcon } from "@/components/icons";
 import { ProductCard } from "@/components/product-card";
+import { ProductColorProvider, ProductGallery } from "@/components/product-color";
 import { PurchasePanel } from "@/components/purchase-panel";
 import { Rail, railItem } from "@/components/rail";
 import { getCollection, getNewArrivals, getProduct, getRelated, products, salePrice, siteUrl } from "@/lib/data";
@@ -18,7 +18,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/product/[slug]">): Promise<Metadata> {
   const product = getProduct((await params).slug);
   if (!product) return {};
-  const description = `${product.pieces} ${product.fabric.toLowerCase()} unstitched suit in ${product.color.name.toLowerCase()}. ${product.description}`;
+  const description = `${product.pieces} ${product.fabric.toLowerCase()} unstitched suit in ${product.colors.map((c) => c.name.toLowerCase()).join(", ")}. ${product.description}`;
   return {
     title: product.name,
     description,
@@ -58,7 +58,7 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
     description: product.description,
     image: product.images.map((src) => `${siteUrl}${src}`),
     material: product.fabric,
-    color: product.color.name,
+    color: product.colors.map((c) => c.name).join(", "),
     brand: { "@type": "Brand", name: "Roshni" },
     offers: {
       "@type": "AggregateOffer",
@@ -99,26 +99,23 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
         </ol>
       </nav>
 
+      <ProductColorProvider slug={product.slug} colors={product.colors}>
       <div className="grid gap-10 lg:grid-cols-[1.25fr_1fr] lg:gap-16 [&>*]:min-w-0">
-        <div className="lg:sticky lg:top-36 lg:self-start">
-          <Gallery images={product.images} alt={product.name} />
-        </div>
+        <ProductGallery alt={product.name} />
 
-        <div>
+        <div className="animate-fade-up [animation-delay:120ms]">
           <p className="mb-2 text-xs uppercase tracking-[0.24em] text-gold">
             {collection?.name} · {product.pieces}
           </p>
           <h1 className="font-serif text-4xl leading-tight sm:text-5xl">{product.name}</h1>
           <p className="mb-6 mt-2 text-xs uppercase tracking-wider text-muted">Article: {product.sku}</p>
-          <p className="mb-6 flex items-center gap-2 text-sm">
-            <span className="h-5 w-5 rounded-full border border-line" style={{ background: product.color.hex }} aria-hidden="true" />
-            Colour: {product.color.name}
+          <p className="mb-6 text-sm text-muted">
+            Available in {product.colors.length} colours
           </p>
 
           <PurchasePanel
             slug={product.slug}
             name={product.name}
-            image={product.images[0]}
             lengths={product.lengths}
             discount={product.discount}
             inStock={product.inStock}
@@ -171,6 +168,8 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
           </div>
         </div>
       </div>
+
+      </ProductColorProvider>
 
       {related.length > 0 && (
         <section aria-labelledby="related-heading" className="mt-24">

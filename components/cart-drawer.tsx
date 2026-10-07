@@ -61,7 +61,7 @@ export function CartDrawer() {
                         <Link href={`/product/${l.slug}`} onClick={close} className="block truncate font-medium hover:text-henna">
                           {l.name}
                         </Link>
-                        <p className="text-sm text-muted">{l.length}</p>
+                        <p className="text-sm text-muted">{[l.length, l.color].filter(Boolean).join(" · ")}</p>
                       </div>
                       <p className="shrink-0 tabular-nums">{formatPrice(l.price * l.qty)}</p>
                     </div>

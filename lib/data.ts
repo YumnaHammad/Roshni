@@ -9,6 +9,11 @@ export interface LengthOption {
   price: number;
 }
 
+export interface ColorOption {
+  name: string;
+  hex: string;
+}
+
 export interface Product {
   slug: string;
   name: string;
@@ -17,14 +22,14 @@ export interface Product {
   collection: string;
   fabric: Fabric;
   pieces: Pieces;
-  /** Colour name and a hex used for the swatch dot */
-  color: { name: string; hex: string };
+  /** Colour options. The first is the default. Each colour has its own images (see imagesFor). */
+  colors: ColorOption[];
   /** Available lengths. The first one is the default and its price is the "from" price. */
   lengths: LengthOption[];
   /** Percentage off, e.g. 30. Omit when not on sale. */
   discount?: number;
   tags: Tag[];
-  /** Paths under /public. The second image is shown on card hover. */
+  /** Images of the default colour (paths under /public). The second is shown on card hover. */
   images: string[];
   description: string;
   /** What's included, e.g. "Printed lawn shirt 3m" */
@@ -69,9 +74,24 @@ const lengths = (base: number): LengthOption[] => [
   { label: "4m", price: Math.round((base * 1.6) / 50) * 50 },
 ];
 
-const images = (slug: string) => [1, 2, 3].map((n) => `/products/${slug}-${n}.svg`);
+/** Images for a product in a given colour (index into product.colors). */
+export const imagesFor = (slug: string, colorIdx = 0) => [1, 2, 3].map((n) => `/products/${slug}-c${colorIdx}-${n}.svg`);
 
-type Seed = Omit<Product, "images" | "lengths" | "sku" | "tags"> & { base: number; tags?: Tag[] };
+/** Extra colourways offered alongside each product's own colour. */
+const colorways: ColorOption[] = [
+  { name: "Ivory", hex: "#efe3c8" },
+  { name: "Rose", hex: "#d9798a" },
+  { name: "Teal", hex: "#2f8f8a" },
+  { name: "Mustard", hex: "#d9a53a" },
+  { name: "Indigo", hex: "#1f3a68" },
+  { name: "Maroon", hex: "#5e1626" },
+  { name: "Emerald", hex: "#1d5c47" },
+  { name: "Plum", hex: "#4b1f43" },
+  { name: "Charcoal", hex: "#3a3735" },
+  { name: "Sky Blue", hex: "#7fa7c9" },
+];
+
+type Seed = Omit<Product, "images" | "lengths" | "sku" | "tags" | "colors"> & { color: ColorOption; base: number; tags?: Tag[] };
 
 const seeds: Seed[] = [
   // Summer Lawn
@@ -109,12 +129,19 @@ const seeds: Seed[] = [
 
 const codes: Record<string, string> = { "summer-lawn": "SL", embroidered: "EM", festive: "FS", winter: "WN" };
 
-export const products: Product[] = seeds.map(({ base, tags, ...s }, i) => ({
+function colorsFor(own: ColorOption, i: number): ColorOption[] {
+  const extra = colorways.filter((c) => c.name !== own.name && c.hex !== own.hex);
+  const count = i % 3 === 0 ? 1 : 2; // two or three colours per product
+  return [own, ...Array.from({ length: count }, (_, k) => extra[(i * 3 + k * 4) % extra.length])];
+}
+
+export const products: Product[] = seeds.map(({ base, tags, color, ...s }, i) => ({
   ...s,
   sku: `RS-${codes[s.collection]}26-${String(i + 1).padStart(2, "0")}`,
   lengths: lengths(base),
   tags: tags ?? [],
-  images: images(s.slug),
+  colors: colorsFor(color, i),
+  images: imagesFor(s.slug),
 }));
 
 export const fabrics: Fabric[] = ["Lawn", "Chiffon", "Organza", "Khaddar", "Jacquard", "Cotton Silk"];

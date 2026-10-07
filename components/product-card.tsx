@@ -10,7 +10,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   return (
     <div className="group relative">
       <div className="relative aspect-4/5 overflow-hidden bg-sand">
-        <Link href={href} tabIndex={-1} aria-hidden="true">
+        <Link href={href} tabIndex={-1} aria-hidden="true" className="absolute inset-0">
           <Image
             src={product.images[0]}
             alt=""
@@ -26,7 +26,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           {product.discount && product.inStock && <span className="bg-henna px-2 py-1 text-white">-{product.discount}%</span>}
           {isNew && <span className="bg-ivory px-2 py-1 text-ink">New</span>}
         </div>
-        {product.inStock && <QuickAdd slug={product.slug} name={product.name} image={product.images[0]} length={product.lengths[0].label} price={fromPrice(product)} />}
+        {product.inStock && <QuickAdd slug={product.slug} name={product.name} image={product.images[0]} length={product.lengths[0].label} color={product.colors[0].name} price={fromPrice(product)} />}
       </div>
       <div className="mt-3 space-y-1">
         <p className="text-[11px] uppercase tracking-[0.16em] text-muted">
@@ -37,8 +37,12 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         </Link>
         <Price price={product.lengths[0].price} discount={product.discount} />
         <p className="flex items-center gap-1.5 text-xs text-muted">
-          <span className="h-3 w-3 rounded-full border border-line" style={{ background: product.color.hex }} aria-hidden="true" />
-          {product.color.name}
+          <span className="flex -space-x-1" aria-hidden="true">
+            {product.colors.map((c) => (
+              <span key={c.name} className="h-3.5 w-3.5 rounded-full border-2 border-ivory ring-1 ring-line" style={{ background: c.hex }} />
+            ))}
+          </span>
+          {product.colors.length} colours
         </p>
       </div>
     </div>
