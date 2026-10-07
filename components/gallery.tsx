@@ -25,7 +25,7 @@ export function Gallery({ images, alt }: { images: string[]; alt: string }) {
       <div
         ref={track}
         onScroll={onScroll}
-        className="no-scrollbar flex aspect-[4/5] flex-1 snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-xl bg-sand"
+        className="no-scrollbar flex aspect-4/5 min-w-0 flex-1 snap-x lg:max-h-[calc(100svh-11rem)] snap-mandatory overflow-x-auto overscroll-x-contain bg-sand"
         aria-roledescription="carousel"
         aria-label={`${alt} images`}
         tabIndex={0}
@@ -48,7 +48,7 @@ export function Gallery({ images, alt }: { images: string[]; alt: string }) {
             onClick={() => go(i)}
             aria-label={`Show image ${i + 1}`}
             aria-current={active === i}
-            className={`relative h-20 w-16 overflow-hidden rounded-md border-2 transition-opacity ${active === i ? "border-ink" : "border-transparent opacity-70 hover:opacity-100"}`}
+            className={`relative h-24 w-[76px] overflow-hidden border-2 transition-opacity ${active === i ? "border-ink" : "border-transparent opacity-70 hover:opacity-100"}`}
           >
             <Image src={src} alt="" fill sizes="64px" className="object-cover" />
           </button>

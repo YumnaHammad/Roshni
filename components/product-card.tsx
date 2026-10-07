@@ -1,26 +1,46 @@
 import Image from "next/image";
 import Link from "next/link";
 import { fromPrice, type Product } from "@/lib/data";
-import { formatPrice } from "@/lib/format";
+import { Price } from "./price";
+import { QuickAdd } from "./quick-add";
 
 export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
+  const href = `/product/${product.slug}`;
+  const isNew = product.tags.includes("new");
   return (
-    <Link href={`/product/${product.slug}`} className="group block">
-      <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-sand">
-        <Image
-          src={product.images[0]}
-          alt={`${product.name}, ${product.fabric}`}
-          fill
-          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-          priority={priority}
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        {!product.inStock && <span className="absolute left-2 top-2 rounded-full bg-ivory/90 px-2.5 py-1 text-xs">Sold out</span>}
+    <div className="group relative">
+      <div className="relative aspect-4/5 overflow-hidden bg-sand">
+        <Link href={href} tabIndex={-1} aria-hidden="true">
+          <Image
+            src={product.images[0]}
+            alt=""
+            fill
+            sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, 50vw"
+            priority={priority}
+            className="object-cover transition-[opacity,transform] duration-700 group-hover:scale-[1.03] lg:group-hover:opacity-0"
+          />
+          <Image src={product.images[1]} alt="" fill sizes="(min-width: 1024px) 25vw, 1px" className="hidden object-cover opacity-0 transition-opacity duration-700 group-hover:opacity-100 lg:block" />
+        </Link>
+        <div className="pointer-events-none absolute left-2 top-2 flex flex-col items-start gap-1 text-[11px] font-medium uppercase tracking-wider">
+          {!product.inStock && <span className="bg-ink px-2 py-1 text-ivory">Sold out</span>}
+          {product.discount && product.inStock && <span className="bg-henna px-2 py-1 text-white">-{product.discount}%</span>}
+          {isNew && <span className="bg-ivory px-2 py-1 text-ink">New</span>}
+        </div>
+        {product.inStock && <QuickAdd slug={product.slug} name={product.name} image={product.images[0]} length={product.lengths[0].label} price={fromPrice(product)} />}
       </div>
-      <p className="mt-3 font-medium group-hover:text-henna">{product.name}</p>
-      <p className="text-sm text-muted">
-        {product.fabric} · from <span className="tabular-nums">{formatPrice(fromPrice(product))}</span>
-      </p>
-    </Link>
+      <div className="mt-3 space-y-1">
+        <p className="text-[11px] uppercase tracking-[0.16em] text-muted">
+          {product.pieces} · {product.fabric}
+        </p>
+        <Link href={href} className="block text-[15px] leading-snug hover:text-henna">
+          {product.name}
+        </Link>
+        <Price price={product.lengths[0].price} discount={product.discount} />
+        <p className="flex items-center gap-1.5 text-xs text-muted">
+          <span className="h-3 w-3 rounded-full border border-line" style={{ background: product.color.hex }} aria-hidden="true" />
+          {product.color.name}
+        </p>
+      </div>
+    </div>
   );
 }
